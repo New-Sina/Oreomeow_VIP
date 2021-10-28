@@ -42,14 +42,36 @@ from Crypto.Cipher import AES
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("phone", help="Your Phone Number.")
-    parser.add_argument("password", help="The plaint text or MD5 value of the password.")
-    parser.add_argument("-s", dest="sc_key", nargs=1, help="The SCKEY of the Server Chan.")
-    parser.add_argument("-t", dest="tg_bot_key", nargs=2, help="The Token and Chat ID of your telegram bot.")
-    parser.add_argument("-b", dest="bark_key", nargs=1, help="The key of your bark app.")
-    parser.add_argument("-w", dest="wecom_key", nargs=3, help="Your Wecom ID, App-AgentID and App-Secrets.")
-    parser.add_argument("-p", dest="push_plus_key", nargs=1, help="The token of your pushplus account.")
-    parser.add_argument("-q", dest="qmsg_key", nargs=1, help="The key of your Qmsg account.")
-    parser.add_argument("-d", dest="ding_token", nargs=1, help="The access token of Ding Talk bot.")
+    parser.add_argument(
+        "password", help="The plaint text or MD5 value of the password."
+    )
+    parser.add_argument(
+        "-s", dest="sc_key", nargs=1, help="The SCKEY of the Server Chan."
+    )
+    parser.add_argument(
+        "-t",
+        dest="tg_bot_key",
+        nargs=2,
+        help="The Token and Chat ID of your telegram bot.",
+    )
+    parser.add_argument(
+        "-b", dest="bark_key", nargs=1, help="The key of your bark app."
+    )
+    parser.add_argument(
+        "-w",
+        dest="wecom_key",
+        nargs=3,
+        help="Your Wecom ID, App-AgentID and App-Secrets.",
+    )
+    parser.add_argument(
+        "-p", dest="push_plus_key", nargs=1, help="The token of your pushplus account."
+    )
+    parser.add_argument(
+        "-q", dest="qmsg_key", nargs=1, help="The key of your Qmsg account."
+    )
+    parser.add_argument(
+        "-d", dest="ding_token", nargs=1, help="The access token of Ding Talk bot."
+    )
     args = parser.parse_args()
 
     return {
@@ -67,15 +89,19 @@ def get_args():
 
 def get_envs():
     infos = {
-        "phone": os.getenv('NETEASE_USER'),
-        "password": os.getenv('NETEASE_PWD'),
-        "sc_key": os.getenv('PUSH_KEY'),
-        "tg_bot_key": [os.getenv('TG_BOT_TOKEN'), os.getenv('TG_USER_ID')],
-        "bark_key": os.getenv('BARK'),
-        "wecom_key": [os.getenv('WECOMCHAN_DOMAIN'), os.getenv('WECOMCHAN_SEND_KEY'), os.getenv('WECOMCHAN_TO_USER', '@all')],
-        "push_plus_key": os.getenv('PUSH_PLUS_TOKEN'),
-        "qmsg_key": os.getenv('QMSG_KEY'),
-        "ding_token": os.getenv('DD_BOT_TOKEN')
+        "phone": os.getenv("NETEASE_USER"),
+        "password": os.getenv("NETEASE_PWD"),
+        "sc_key": os.getenv("PUSH_KEY"),
+        "tg_bot_key": [os.getenv("TG_BOT_TOKEN"), os.getenv("TG_USER_ID")],
+        "bark_key": os.getenv("BARK"),
+        "wecom_key": [
+            os.getenv("WECOMCHAN_DOMAIN"),
+            os.getenv("WECOMCHAN_SEND_KEY"),
+            os.getenv("WECOMCHAN_TO_USER", "@all"),
+        ],
+        "push_plus_key": os.getenv("PUSH_PLUS_TOKEN"),
+        "qmsg_key": os.getenv("QMSG_KEY"),
+        "ding_token": os.getenv("DD_BOT_TOKEN"),
     }
     return infos
 
@@ -212,10 +238,14 @@ class Push:
             "duplicate_check_interval": 1800,
         }
         access_token = requests.get(
-            "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={0}&corpsecret={1}".format(str(arg[0]), arg[2])
+            "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={0}&corpsecret={1}".format(
+                str(arg[0]), arg[2]
+            )
         ).json()["access_token"]
         res = requests.post(
-            "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={0}".format(access_token),
+            "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={0}".format(
+                access_token
+            ),
             data=json.dumps(body),
         )
         ret = res.json()
@@ -240,7 +270,9 @@ class Push:
         arg = self.info["ding_token"]
         url = "https://oapi.dingtalk.com/robot/send?access_token={0}".format(arg[0])
         header = {"Content-Type": "application/json"}
-        data = json.dumps({"msgtype": "text", "text": {"content": "【CMLU】\n\n" + self.text}})
+        data = json.dumps(
+            {"msgtype": "text", "text": {"content": "【CMLU】\n\n" + self.text}}
+        )
         ret = requests.post(url, headers=header, data=data)
         print("Ding: " + ret.text)
 
@@ -274,7 +306,14 @@ class CloudMusic:
         self.nickname = ""
         self.uid = ""
         self.login_data = self.enc.encrypt(
-            json.dumps({"phone": phone, "countrycode": country_code, "password": password, "rememberLogin": "true"})
+            json.dumps(
+                {
+                    "phone": phone,
+                    "countrycode": country_code,
+                    "password": password,
+                    "rememberLogin": "true",
+                }
+            )
         )
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -322,8 +361,14 @@ class CloudMusic:
 
     # 执行用户的签到流程
     def sign(self, tp=0):
-        sign_url = "https://music.163.com/weapi/point/dailyTask?{csrf}".format(csrf=self.csrf)
-        res = self.session.post(url=sign_url, data=self.enc.encrypt('{{"type":{0}}}'.format(tp)), headers=self.headers)
+        sign_url = "https://music.163.com/weapi/point/dailyTask?{csrf}".format(
+            csrf=self.csrf
+        )
+        res = self.session.post(
+            url=sign_url,
+            data=self.enc.encrypt('{{"type":{0}}}'.format(tp)),
+            headers=self.headers,
+        )
         ret = json.loads(res.text)
         sign_type = "安卓端" if tp == 0 else "PC/Web端"
         if ret["code"] == 200:
@@ -338,7 +383,9 @@ class CloudMusic:
     def get_recommend_playlists(self):
         recommend_url = "https://music.163.com/weapi/v1/discovery/recommend/resource"
         res = self.session.post(
-            url=recommend_url, data=self.enc.encrypt('{"csrf_token":"' + self.csrf + '"}'), headers=self.headers
+            url=recommend_url,
+            data=self.enc.encrypt('{"csrf_token":"' + self.csrf + '"}'),
+            headers=self.headers,
         )
         ret = json.loads(res.text)
         playlists = []
@@ -350,10 +397,21 @@ class CloudMusic:
 
     # 获取用户的收藏歌单
     def get_subscribe_playlists(self):
-        private_url = "https://music.163.com/weapi/user/playlist?csrf_token=" + self.csrf
+        private_url = (
+            "https://music.163.com/weapi/user/playlist?csrf_token=" + self.csrf
+        )
         res = self.session.post(
             url=private_url,
-            data=self.enc.encrypt(json.dumps({"uid": self.uid, "limit": 1001, "offset": 0, "csrf_token": self.csrf})),
+            data=self.enc.encrypt(
+                json.dumps(
+                    {
+                        "uid": self.uid,
+                        "limit": 1001,
+                        "offset": 0,
+                        "csrf_token": self.csrf,
+                    }
+                )
+            ),
             headers=self.headers,
         )
         ret = json.loads(res.text)
@@ -368,12 +426,16 @@ class CloudMusic:
 
     # 获取某一歌单内的所有音乐ID
     def get_list_musics(self, mlist):
-        detail_url = "https://music.163.com/weapi/v6/playlist/detail?csrf_token=" + self.csrf
+        detail_url = (
+            "https://music.163.com/weapi/v6/playlist/detail?csrf_token=" + self.csrf
+        )
         musics = []
         for m in mlist:
             res = self.session.post(
                 url=detail_url,
-                data=self.enc.encrypt(json.dumps({"id": m, "n": 1000, "csrf_token": self.csrf})),
+                data=self.enc.encrypt(
+                    json.dumps({"id": m, "n": 1000, "csrf_token": self.csrf})
+                ),
                 headers=self.headers,
             )
             ret = json.loads(res.text)
@@ -386,7 +448,11 @@ class CloudMusic:
         musics = []
         recommend_musics = self.get_list_musics(self.get_recommend_playlists())
         # subscribe_musics = self.get_list_musics(self.get_subscribe_playlists())
-        musics.extend(random.sample(recommend_musics, 320) if len(recommend_musics) > 320 else recommend_musics)
+        musics.extend(
+            random.sample(recommend_musics, 320)
+            if len(recommend_musics) > 320
+            else recommend_musics
+        )
         # musics.extend(random.sample(subscribe_musics, 200) if len(subscribe_musics) > 200 else subscribe_musics)
         return musics
 
@@ -448,7 +514,7 @@ def run_task(info, phone, password):
     print(res_m_sign, end="\n\n")
     # Music Task
     res_task = "刷听歌量失败"
-    for i in range(1):
+    for _ in range(1):
         res_task = app.task()
         print(res_task)
     print(30 * "=")
@@ -474,7 +540,7 @@ def tasks_pool(infos):
 
 
 def start():
-    if NETEASE_USER and NETEASE_PWD in os.environ:
+    if ("NETEASE_USER" and "NETEASE_PWD") in os.environ:
         tasks_pool(get_envs())
     else:
         tasks_pool(get_args())
